@@ -1,0 +1,13 @@
+{
+  "name": "busca-cita-andalucia",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "check": "node --check src/index.js && node --check src/config.js && node --check src/api.js && node --check src/notify.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}
