@@ -72,9 +72,11 @@ async function main() {
         console.log(`[${new Date().toISOString()}] CITA DISPONIBLE:\n${resumen}`);
         await notifyAll('Hueco libre en cita previa', mensaje);
       } else if (huecos.length > 0) {
-        console.log(`[${new Date().toISOString()}] Huecos disponibles ya notificados. Próximo recordatorio en ~{config.reminderInterval} min.`);
+        const mins = Math.round(config.reminderInterval / 60000);
+        console.log(`[${new Date().toISOString()}] Hay huecos disponibles (ya notificados). Próximo recordatorio en ~${mins} min. Sigo vigilando.`);
       } else {
-        console.log(`[${new Date().toISOString()}] Sin huecos libres en el rango.`);
+        const pollSecs = `${Math.round(config.pollMinMs / 1000)}-${Math.round(config.pollMaxMs / 1000)}s`;
+        console.log(`[${new Date().toISOString()}] ${fecha}: sin huecos libres. Sigo buscando en ${wanted.length} fechas (próxima consulta en ${pollSecs}).`);
       }
     } catch (error) {
       console.warn(`[${new Date().toISOString()}] Error: ${error.message}`);

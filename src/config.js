@@ -15,6 +15,7 @@ export const config = {
   idServicio: env('ID_SERVICIO'),
   idCliente: env('ID_CLIENTE', '4'),
   numSolicitantes: env('NUM_SOLICITANTES', '1'),
+  debug: env('DEBUG') === '1' || env('DEBUG') === 'true',
   fechaDesde: env('FECHA_DESDE', '2026-09-16'),
   fechaHasta: env('FECHA_HASTA', '2026-09-18'),
   pollMinMs: int('POLL_MIN_MS', 45000),
@@ -29,6 +30,10 @@ export const config = {
     whatsappTo: env('WHATSAPP_TO')
   }
 };
+
+export function debugLog(...args) {
+  if (config.debug) console.log(...args);
+}
 
 export function buildUrl(fecha, idServicio) {
   const params = new URLSearchParams({

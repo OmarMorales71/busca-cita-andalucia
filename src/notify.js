@@ -9,11 +9,24 @@ const execFileAsync = promisify(execFile);
  * Cada canal es independiente: si uno falla, el resto continúa.
  */
 export async function notifyAll(title, message) {
-  const jobs = [notifyMac(title, message), notifyNtfy(title, message), notifyWhatsApp(message)];
-  const results = await Promise.allSettled(jobs);
-  results.forEach((result, i) => {
-    if (result.status === 'rejected') console.warn(`Notificación ${i} fallida: ${result.reason?.message ?? result.reason}`);
-  });
+  const channels = [
+    ['Ordenador (macOS)', () => notifyMac(title, message)],
+    ['ntfy', () => notifyNtfy(title, message)],
+    ['WhatsApp (Twilio)', () => notifyWhatsApp(message)]
+  ];
+
+  const results = await Promise.allSettled(channels.map(([, run]) => run()));
+  const failed = channels
+    .map(([name], i) => ({ name, result: results[i] }))
+    .filter(({ result }) => result.status === 'rejected');
+
+  for (const { name, result } of failed) {
+    console.warn(`Notificación ${name} fallida: ${result.reason?.message ?? result.reason}`);
+  }
+
+  if (failed.length > 0) {
+    console.warn('No te preocupes: el aviso se enviará igualmente por el resto de canales activos.');
+  }
 }
 
 async function notifyMac(title, message) {

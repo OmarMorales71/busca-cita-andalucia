@@ -1,4 +1,4 @@
-import { buildUrl, config } from './config.js';
+import { buildUrl, config, debugLog } from './config.js';
 
 /**
  * Lista de fechas dentro del rango [desde, hasta], en orden.
@@ -25,14 +25,14 @@ export function targetDates(desde = config.fechaDesde, hasta = config.fechaHasta
  * Devuelve: [{ fecha, horaInicio, horaFin, huecosLibres }]
  */
 export async function fetchHuecosLibres(fecha, idServicio) {
-  console.log(`[${new Date().toISOString()}] Consultando ${buildUrl(fecha, idServicio)}...`);
+  debugLog(`[${new Date().toISOString()}] Consultando ${buildUrl(fecha, idServicio)}...`);
   const response = await fetch(buildUrl(fecha, idServicio), {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(60000)
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const data = await response.json();
-  console.log(`[${new Date().toISOString()}] Respuesta del servicio: ${JSON.stringify(data)}`);
+  debugLog(`[${new Date().toISOString()}] Respuesta del servicio: ${JSON.stringify(data)}`);
   const wanted = new Set(targetDates() ?? []);
   const found = [];
 
