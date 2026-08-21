@@ -1,6 +1,7 @@
 import { config } from './config.js';
 import { fetchHuecosLibres, targetDates } from './api.js';
 import { notifyAll } from './notify.js';
+import { resolveServiceId } from './resolve.js';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomBetween = (min, max) => Math.floor(min + Math.random() * (max - min + 1));
@@ -17,11 +18,36 @@ function nextQueryDate(index) {
   return wanted[index % wanted.length];
 }
 
+// Resuelve el idServicio: OFICINA+SERVICIO vía HTTP, o ID_SERVICIO como atajo de desarrollador.
+async function resolveTargetService() {
+  if (config.oficina && config.servicio) {
+    const resolved = await resolveServiceId({
+      oficina: config.oficina,
+      servicio: config.servicio,
+      idCliente: config.idCliente
+    });
+    console.log(`Oficina: ${resolved.oficinaNombre} (${resolved.idOficina})`);
+    console.log(`Servicio: ${resolved.servicioNombre} (${resolved.idServicio})`);
+    return resolved.idServicio;
+  }
+
+  if (config.idServicio) {
+    console.log(`Usando ID_SERVICIO directo: ${config.idServicio}`);
+    return config.idServicio;
+  }
+
+  throw new Error(
+    'Falta configuración: define OFICINA y SERVICIO en .env (ej. OFICINA="Granada", SERVICIO="Juras de nacionalidad").\n' +
+      'Como alternativa de desarrollador puedes definir ID_SERVICIO directamente.'
+  );
+}
+
 async function main() {
+  const idServicio = await resolveTargetService();
   const notifiedAt = new Map();
   let cycle = 0;
 
-  console.log(`Vigilando huecos libres en ${wanted.join(', ')} (servicio ${config.idServicio}).`);
+  console.log(`Vigilando huecos libres en ${wanted.join(', ')} (servicio ${idServicio}).`);
   console.log(`Intervalo ${Math.round(config.pollMinMs / 1000)}-${Math.round(config.pollMaxMs / 1000)}s. Ctrl+C para detener.`);
 
   while (true) {
@@ -31,7 +57,7 @@ async function main() {
 
       const fecha = nextQueryDate(cycle);
       cycle += 1;
-      const huecos = await fetchHuecosLibres(fecha);
+      const huecos = await fetchHuecosLibres(fecha, idServicio);
       const nuevos = huecos.filter((h) => {
         const last = notifiedAt.get(`${h.fecha}|${h.horaInicio}`) ?? 0;
         return now - last >= config.reminderInterval;
@@ -66,6 +92,6 @@ function cleanupExpired(notifiedAt, now) {
 }
 
 main().catch((error) => {
-  console.error(error);
+  console.error(`\n${error?.message ?? error}`);
   process.exitCode = 1;
 });

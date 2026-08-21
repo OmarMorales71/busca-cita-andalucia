@@ -24,8 +24,9 @@ export function targetDates(desde = config.fechaDesde, hasta = config.fechaHasta
  *
  * Devuelve: [{ fecha, horaInicio, horaFin, huecosLibres }]
  */
-export async function fetchHuecosLibres(fecha) {
-  const response = await fetch(buildUrl(fecha), {
+export async function fetchHuecosLibres(fecha, idServicio) {
+  console.log(`[${new Date().toISOString()}] Consultando ${buildUrl(fecha, idServicio)}...`);
+  const response = await fetch(buildUrl(fecha, idServicio), {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(60000)
   });

@@ -10,7 +10,9 @@ const int = (name, fallback) => {
 };
 
 export const config = {
-  idServicio: env('ID_SERVICIO', '180'),
+  oficina: env('OFICINA'),
+  servicio: env('SERVICIO'),
+  idServicio: env('ID_SERVICIO'),
   idCliente: env('ID_CLIENTE', '4'),
   numSolicitantes: env('NUM_SOLICITANTES', '1'),
   fechaDesde: env('FECHA_DESDE', '2026-09-16'),
@@ -24,16 +26,13 @@ export const config = {
     sid: env('TWILIO_ACCOUNT_SID'),
     token: env('TWILIO_AUTH_TOKEN'),
     whatsappFrom: env('TWILIO_WHATSAPP_FROM'),
-    whatsappTo: env('WHATSAPP_TO'),
-    voiceFrom: env('TWILIO_VOICE_FROM'),
-    voiceTo: env('VOICE_TO'),
-    voiceTwimlUrl: env('TWILIO_VOICE_TWIML_URL')
+    whatsappTo: env('WHATSAPP_TO')
   }
 };
 
-export function buildUrl(fecha) {
+export function buildUrl(fecha, idServicio) {
   const params = new URLSearchParams({
-    idServicio: config.idServicio,
+    idServicio,
     fecha,
     numSolicitantesCalendario: config.numSolicitantes,
     buscarPrimerHuecoLibre: 'true',
